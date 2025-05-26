@@ -1,0 +1,40 @@
+sudo useradd -m -s /bin/bash arun  # creating new user and home 
+sudo passwd arun
+sudo usermod -aG sudo arun   # adding user sudo group
+usermod -aG wheel newuser
+
+
+# give user root premission
+
+username ALL=(ALL:ALL) ALL  # user running every time asking password
+arun ALL=(ALL:ALL) NOPASSWD:ALL
+
+
+# creating user
+
+sudo useradd bala
+sudo passwd bala
+
+# Create a Group
+sudo groupadd developer
+sudo usermod -aG developer username
+
+#Delete All Users and Groups (Be Careful!)
+sudo userdel -r bala
+sudo groupdel -r developer
+
+# adding group to root
+sudo usermod -aG groupname root
+
+===================================================================================================
+
+#To restrict file deletion but allow reading:
+
+chmod u-w filename
+chmod g-w directoryname
+chown root:groupname filename
+
+
+#Bonus: Lock File Deletion with Immutable Flag
+chattr +i /project_data/important_file.txt
+lsattr +i /project_data/important_file.txt
