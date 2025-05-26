@@ -1,0 +1,63 @@
+Creating a Logical Volume Manager (LVM) setup on Linux involves configuring physical volumes, 
+volume groups, and logical volumes to manage disk storage flexibly.
+ Below is a step-by-step guide with an example to create an LVM setup.
+
+ # creating LVM
+ sudo apt-get install lvm2 # installating lvm tool
+
+#Identify Disks
+ lsblk    
+ 
+#NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+#sda      8:0    0  20G  0 disk
+#└─sda1   8:1    0  20G  0 part /
+#sdb      8:16   0  10G  0 disk
+#sdc      8:32   0  10G  0 disk
+
+/dev/sdb and /dev/sdc are unpartitioned disks for LVM.
+
+# Create Physical Volumes (PVs) Initialize the disks as physical volumes:
+
+sudo pvcreate /dev/sdb /dev/sdc
+#verify
+
+sudo pvs
+
+#Create a Volume Group (VG) Combine the physical volumes into a volume group named
+
+sudo vgcreate my_vg /dev/sdb /dev/sdc
+
+# sudo vgs
+
+#Create a Logical Volume (LV) Create a logical volume named my_lv with 15GB from my_vg:
+sudo lvcreate -L 15G -n my_lv my_vg
+
+#verify
+sudo lvs
+
+#Format the Logical Volume Format the logical volume with a filesystem (e.g., ext4):
+sudo mkfs.ext4 /dev/my_vg/my_lv
+
+#Mount the Logical Volume Create a mount point and mount the volume:
+sudo mkdir /mnt/my_data
+sudo mount /dev/my_vg/my_lv /mnt/my_data
+
+#verify
+df -h /mnt/my_data
+
+#example:
+Filesystem                 Size  Used Avail Use% Mounted on
+/dev/mapper/my_vg-my_lv   15G   41M   15G   1% /mnt/my_data
+
+
+#Make the Mount Persistent Add an entry to /etc/fstab to mount automatically on boot:
+
+echo "/dev/my_vg/my_lv /mnt/my_data ext4 defaults 0 2" | sudo tee -a /etc/fstab
+
+#Test the fstab entry:
+sudo mount -a
+
+#Extend the logical volume:
+
+sudo lvextend -L +10G /dev/my_vg/my_lv
+sudo resize2fs /dev/my_vg/my_lv
